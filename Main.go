@@ -29,24 +29,55 @@ func CreateFile(path string) *os.File {
 	return f
 }
 
+func DispatchArg(arg string) {
+	argSwitch := arg[1:strings.Index(arg, " ")]
+	fmt.Println(argSwitch)
+}
+
+func GetCommandLineArgs() {
+	args := os.Args[1:]
+	for i := 0; i < len(args); i++ {
+		DispatchArg(args[i])
+	}
+}
+
 func main() {
 	t := translator.New()
 
-	fmt.Println("Welcome")
-	input := bufio.NewReader(os.Stdin)
+	var SourcePath, DestinationPath string
+	var Quiet bool = false
 
-	fmt.Print("Input source file: ")
-	filePath, _ := input.ReadString('\n')
+	for i := 0; i < len(os.Args); i++ {
+		currentArg := os.Args[i]
+		if currentArg[0] == '-' {
+			var nextArg string
+			if i+2 > len(os.Args) { // Array indices are zero-based but array lengths are not
+				panic("Switch is missing an argument!")
+			} else {
+				nextArg = os.Args[i+1]
+			}
 
-	//	file, _ := os.Open("Assets/KO 105 tr.srt")
-	file, _ := os.Open(filePath)
+			switch currentArg {
+			case "-s", "--src", "--source":
+				SourcePath = nextArg
+				fmt.Println("source is " + SourcePath) // Temp
+			case "-d", "--dest", "--destination":
+				DestinationPath = nextArg
+				fmt.Println("dst is " + DestinationPath) // Temp
+			case "-q", "--quiet":
+				Quiet = true
+			default:
+				panic("Unrecognized switch used!")
+			}
+		}
+	}
 
-	fmt.Print("Input destination file: ")
-	outPath, _ := input.ReadString('\n')
-	outFile := CreateFile(outPath)
-	//outFile := CreateFile("Assets/Translated-eng - 105.srt")
+	//fmt.Println("Welcome")
 
-	scanner := bufio.NewScanner(file)
+	inFile, _ := os.Open(SourcePath)
+	outFile := CreateFile(DestinationPath)
+
+	scanner := bufio.NewScanner(inFile)
 	for scanner.Scan() {
 		line := scanner.Text()
 		var outBuf string
@@ -62,10 +93,13 @@ func main() {
 		}
 
 		outFile.WriteString(outBuf)
-		fmt.Print(outBuf)
+
+		if !Quiet {
+			fmt.Print(outBuf)
+		}
 	}
 
-	file.Close()
+	inFile.Close()
 	outFile.Close()
 
 	fmt.Println("\nTranslation has concluded!")
