@@ -1,0 +1,3 @@
+[submodule "Vendor/go-googletrans"]
+	path = Vendor/go-googletrans
+	url = https://github.com/Conight/go-googletrans.git

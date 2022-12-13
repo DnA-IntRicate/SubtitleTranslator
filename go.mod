@@ -1,5 +1,3 @@
-module SubtitleTranslator
+module github.com/DnA-IntRicate/SubtitleTranslator
 
 go 1.18
-
-require github.com/Conight/go-googletrans v0.2.2

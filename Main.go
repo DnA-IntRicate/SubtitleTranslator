@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	translator "github.com/Conight/go-googletrans"
+	translator "go-googletrans"
 )
 
 func isNumber(s string) bool {
