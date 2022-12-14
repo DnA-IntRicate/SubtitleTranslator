@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 	"unicode"
 )
 
@@ -17,39 +16,30 @@ func isNumber(s string) bool {
 	return true
 }
 
+func Assert(check bool, msg string) {
+	if !check {
+		fmt.Println(msg)
+		os.Exit(1)
+	}
+}
+
+func AssertError(err error) {
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+}
+
 func CreateFile(path string) *os.File {
 	f, err := os.Create(path)
-	if err != nil {
-		panic(err)
-	}
+	AssertError(err)
 
 	return f
 }
 
 func OpenFile(path string) *os.File {
 	file, err := os.Open(path)
-	if err != nil {
-		panic(err)
-	}
+	AssertError(err)
 
 	return file
-}
-
-func DispatchArg(arg string) {
-	argSwitch := arg[1:strings.Index(arg, " ")]
-	fmt.Println(argSwitch)
-}
-
-func GetCommandLineArgs() {
-	args := os.Args[1:]
-	for i := 0; i < len(args); i++ {
-		DispatchArg(args[i])
-	}
-}
-
-func Assert(check bool, msg string) {
-	if !check {
-		fmt.Println(msg)
-		os.Exit(1)
-	}
 }

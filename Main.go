@@ -10,59 +10,15 @@ import (
 )
 
 func Help(exitCode int) {
-	// messages
+	fmt.Println("Help menu")
 	os.Exit(exitCode)
 }
 
-func main() {
+func TranslateFile(srcPath, dstPath, srcLang, dstLang string, quiet bool) error {
 	t := translator.New()
 
-	var SourcePath, DestinationPath string
-	var DstLanguage string = "en"
-	var SrcLanguage string = "auto"
-
-	var Quiet bool = false
-
-	if (len(os.Args) == 2) && ((os.Args[1] == "help") || (os.Args[1] == "?")) {
-		Help(0)
-		//	} else {
-		//		fmt.Println("Unknown argument!\nRun 'SubtitleTranslator help' for a list of valid arguments.")
-		//		os.Exit(1)
-	}
-
-	for i := 1; i < len(os.Args); i++ {
-		currentArg := os.Args[i]
-		if currentArg[0] == '-' {
-			var nextArg string
-			Assert(i+1 < len(os.Args), "Switch is missing an argument!") // Array indices are zero-based but array lengths are not
-			nextArg = os.Args[i+1]
-
-			switch currentArg {
-			case "-i", "--in", "--input":
-				SourcePath = nextArg
-				break
-			case "-o", "--out", "--output":
-				DestinationPath = nextArg
-				break
-			case "-s", "--src", "--source":
-				SrcLanguage = nextArg
-				break
-			case "-d", "--dest", "--destination":
-				DstLanguage = nextArg
-				break
-			case "-q", "--quiet":
-				Quiet = true
-				break
-			default:
-				fmt.Printf("Bad switch: '%s'", currentArg)
-				Help(1)
-			}
-		}
-	}
-
-	// Abstract this out to a separate function
-	inFile := OpenFile(SourcePath)
-	outFile := CreateFile(DestinationPath)
+	inFile := OpenFile(srcPath)
+	outFile := CreateFile(dstPath)
 
 	scanner := bufio.NewScanner(inFile)
 	for scanner.Scan() {
@@ -70,9 +26,9 @@ func main() {
 		var outBuf string
 
 		if !isNumber(line) && !strings.Contains(line, "-->") && line != "\n" {
-			translated, err := t.Translate(line, SrcLanguage, DstLanguage)
+			translated, err := t.Translate(line, srcLang, dstLang)
 			if err != nil {
-				panic(err)
+				return err
 			}
 			outBuf = translated.Text + "\n"
 		} else {
@@ -80,14 +36,83 @@ func main() {
 		}
 
 		outFile.WriteString(outBuf)
-
-		if !Quiet {
+		if !quiet {
 			fmt.Print(outBuf)
 		}
 	}
 
 	inFile.Close()
 	outFile.Close()
+
+	return nil
+}
+
+func main() {
+	var SourcePath, DestinationPath string
+	var DstLanguage string = "en"
+	var SrcLanguage string = "auto"
+	var Quiet bool = false
+
+	if len(os.Args) <= 1 {
+		Help(1)
+	} else if (len(os.Args) == 2) && ((os.Args[1] == "help") || (os.Args[1] == "?")) {
+		Help(0)
+	}
+
+	validArgFound := false
+	for i := 1; i < len(os.Args); i++ {
+		currentArg := os.Args[i]
+		if currentArg[0] == '-' {
+			switch currentArg {
+			case "-i", "--in", "--input":
+				Assert(i+1 < len(os.Args), "Switch "+"\""+currentArg+"\""+" is missing an argument!")
+				i++
+				SourcePath = os.Args[i]
+				validArgFound = true
+			case "-o", "--out", "--output":
+				Assert(i+1 < len(os.Args), "Switch "+"\""+currentArg+"\""+" is missing an argument!")
+				i++
+				DestinationPath = os.Args[i]
+				validArgFound = true
+			case "-s", "--src", "--source":
+				Assert(i+1 < len(os.Args), "Switch "+"\""+currentArg+"\""+" is missing an argument!")
+				i++
+				SrcLanguage = os.Args[i]
+				validArgFound = true
+			case "-d", "--dest", "--destination":
+				Assert(i+1 < len(os.Args), "Switch "+"\""+currentArg+"\""+" is missing an argument!")
+				i++
+				DstLanguage = os.Args[i]
+				validArgFound = true
+			case "-q", "--quiet":
+				Quiet = true
+				validArgFound = true
+			default:
+				fmt.Printf("Unknown switch: \"%s\".\n", currentArg)
+				Help(1)
+			}
+		}
+	}
+
+	if !validArgFound {
+		fmt.Println("Unknown command!")
+		Help(1)
+	}
+
+	if SourcePath == "" {
+		fmt.Println("No source path was specified!")
+		os.Exit(1)
+	}
+
+	if DestinationPath == "" {
+		fmt.Println("No destination path was specified!")
+		os.Exit(1)
+	}
+
+	fmt.Printf("Translating \"%s\" to \"%s\".\n", SourcePath, DestinationPath)
+	fmt.Println("============================================================================")
+	err := TranslateFile(SourcePath, DestinationPath, SrcLanguage, DstLanguage, Quiet)
+	AssertError(err)
 
 	fmt.Println("\nTranslation has concluded!")
 	fmt.Scanln()
