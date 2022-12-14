@@ -5,76 +5,63 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"unicode"
 
 	translator "go-googletrans"
 )
 
-func isNumber(s string) bool {
-	for _, c := range s {
-		if !unicode.IsDigit(c) {
-			return false
-		}
-	}
-
-	return true
-}
-
-func CreateFile(path string) *os.File {
-	f, err := os.Create(path)
-	if err != nil {
-		panic(err)
-	}
-
-	return f
-}
-
-func DispatchArg(arg string) {
-	argSwitch := arg[1:strings.Index(arg, " ")]
-	fmt.Println(argSwitch)
-}
-
-func GetCommandLineArgs() {
-	args := os.Args[1:]
-	for i := 0; i < len(args); i++ {
-		DispatchArg(args[i])
-	}
+func Help(exitCode int) {
+	// messages
+	os.Exit(exitCode)
 }
 
 func main() {
 	t := translator.New()
 
 	var SourcePath, DestinationPath string
+	var DstLanguage string = "en"
+	var SrcLanguage string = "auto"
+
 	var Quiet bool = false
 
-	for i := 0; i < len(os.Args); i++ {
+	if (len(os.Args) == 2) && ((os.Args[1] == "help") || (os.Args[1] == "?")) {
+		Help(0)
+		//	} else {
+		//		fmt.Println("Unknown argument!\nRun 'SubtitleTranslator help' for a list of valid arguments.")
+		//		os.Exit(1)
+	}
+
+	for i := 1; i < len(os.Args); i++ {
 		currentArg := os.Args[i]
 		if currentArg[0] == '-' {
 			var nextArg string
-			if i+2 > len(os.Args) { // Array indices are zero-based but array lengths are not
-				panic("Switch is missing an argument!")
-			} else {
-				nextArg = os.Args[i+1]
-			}
+			Assert(i+1 < len(os.Args), "Switch is missing an argument!") // Array indices are zero-based but array lengths are not
+			nextArg = os.Args[i+1]
 
 			switch currentArg {
-			case "-s", "--src", "--source":
+			case "-i", "--in", "--input":
 				SourcePath = nextArg
-				fmt.Println("source is " + SourcePath) // Temp
-			case "-d", "--dest", "--destination":
+				break
+			case "-o", "--out", "--output":
 				DestinationPath = nextArg
-				fmt.Println("dst is " + DestinationPath) // Temp
+				break
+			case "-s", "--src", "--source":
+				SrcLanguage = nextArg
+				break
+			case "-d", "--dest", "--destination":
+				DstLanguage = nextArg
+				break
 			case "-q", "--quiet":
 				Quiet = true
+				break
 			default:
-				panic("Unrecognized switch used!")
+				fmt.Printf("Bad switch: '%s'", currentArg)
+				Help(1)
 			}
 		}
 	}
 
-	//fmt.Println("Welcome")
-
-	inFile, _ := os.Open(SourcePath)
+	// Abstract this out to a separate function
+	inFile := OpenFile(SourcePath)
 	outFile := CreateFile(DestinationPath)
 
 	scanner := bufio.NewScanner(inFile)
@@ -83,7 +70,7 @@ func main() {
 		var outBuf string
 
 		if !isNumber(line) && !strings.Contains(line, "-->") && line != "\n" {
-			translated, err := t.Translate(line, "tr", "en")
+			translated, err := t.Translate(line, SrcLanguage, DstLanguage)
 			if err != nil {
 				panic(err)
 			}
