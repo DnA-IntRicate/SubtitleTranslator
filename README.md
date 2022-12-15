@@ -49,6 +49,8 @@ Convert explicitly from English explicitly to Urdu: 'SubtitleTranslator -i Input
 
 ```batch
 go build .
+OR
+go build -ldflags "-s -w"
 ```
 
 This will output the executable to the project's root.
@@ -57,9 +59,21 @@ This will output the executable to the project's root.
 
 ```batch
 go install .
+OR
+go install -ldflags "-s -w"
 ```
 
 This will build the executable to GOPATH.
+
+### Install Go
+
+[Download Go](https://go.dev/dl/)
+
+Debian:
+```shell
+sudo apt-get update
+sudo apt-get install golang-go
+```
 
 ## License
 
