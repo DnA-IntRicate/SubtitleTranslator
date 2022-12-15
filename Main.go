@@ -23,9 +23,9 @@ func Help(exitCode int) {
 	fmt.Print("\n")
 	fmt.Println("Valid usages:")
 	fmt.Println("Convert from any language implicitly to English: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt'")
-	fmt.Println("Convert explicitly from Turkish implicitly to English: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt -s tr")
-	fmt.Println("Convert explicitly from Turkish implicitly to English: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt -s tr")
-	fmt.Println("Convert explicitly from English explicitly to Urdu: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt -s en -d ur")
+	fmt.Println("Convert explicitly from Turkish implicitly to English: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt -s tr'")
+	fmt.Println("Convert explicitly from Turkish implicitly to English: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt -s tr'")
+	fmt.Println("Convert explicitly from English explicitly to Urdu: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt -s en -d ur'")
 
 	os.Exit(exitCode)
 }
