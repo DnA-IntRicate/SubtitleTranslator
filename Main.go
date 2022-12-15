@@ -9,8 +9,24 @@ import (
 	translator "go-googletrans"
 )
 
+const APP_VERSION string = "1.0"
+
 func Help(exitCode int) {
-	fmt.Println("Help menu")
+	fmt.Printf("SubtitleTranslator v%s.\n", APP_VERSION)
+	fmt.Print("\n")
+	fmt.Println("Valid switches:")
+	fmt.Println("-i, --in, --input\t\tSpecify the input file path.")
+	fmt.Println("-o, --out, --output\t\tSpecify the file path to ouput translated file.")
+	fmt.Println("-s, --src, --source\t\tSpecify the source file's language. (Set to 'auto' by default).")
+	fmt.Println("-d, --dst, --destination\tSpecify the language to translate to. (Set to 'English (en)' by default).")
+	fmt.Println("-q, --quiet\t\t\tDon't output translation results in terminal.")
+	fmt.Print("\n")
+	fmt.Println("Valid usages:")
+	fmt.Println("Convert from any language implicitly to English: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt'")
+	fmt.Println("Convert explicitly from Turkish implicitly to English: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt -s tr")
+	fmt.Println("Convert explicitly from Turkish implicitly to English: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt -s tr")
+	fmt.Println("Convert explicitly from English explicitly to Urdu: 'SubtitleTranslator -i InputFile.srt -o OutputFile.srt -s en -d ur")
+
 	os.Exit(exitCode)
 }
 
@@ -79,7 +95,7 @@ func main() {
 				i++
 				SrcLanguage = os.Args[i]
 				validArgFound = true
-			case "-d", "--dest", "--destination":
+			case "-d", "--dst", "--destination":
 				Assert(i+1 < len(os.Args), "Switch "+"\""+currentArg+"\""+" is missing an argument!")
 				i++
 				DstLanguage = os.Args[i]
